@@ -1,0 +1,28 @@
+{
+  "name": "threejs-journey",
+  "version": "1.0.0",
+  "description": "My learning journey about threejs from https://threejs-journey.com/",
+  "main": "index.js",
+  "repository": "git@github.com:alisyahidin/threejs-journey.git",
+  "author": "Ali Syahidin <alisyahidin.me@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "webpack && webpack serve"
+  },
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.7",
+    "@types/three": "^0.146.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "ts-loader": "^9.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "dat.gui": "^0.7.9",
+    "three": "^0.146.0"
+  }
+}
