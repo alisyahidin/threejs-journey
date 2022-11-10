@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GUI } from 'dat.gui';
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 class Scene extends THREE.Scene {
   debugger: GUI = null;
@@ -24,7 +24,7 @@ class Scene extends THREE.Scene {
 
     // setup renderer
     this.renderer = new THREE.WebGLRenderer({
-      canvas: document.getElementById("canvas") as HTMLCanvasElement,
+      canvas: document.getElementById('canvas') as HTMLCanvasElement,
       alpha: true
     });
     this.renderer.setSize(this.width, this.height);
@@ -72,7 +72,7 @@ class Scene extends THREE.Scene {
     // setup Debugger
     if (debug) {
       this.debugger = new GUI();
-      const lightGroup = this.debugger.addFolder("Lights");
+      const lightGroup = this.debugger.addFolder('Lights');
       for (let i = 0; i < this.lights.length; i++) {
         lightGroup.add(this.lights[i], 'visible', true);
       }

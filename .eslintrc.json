@@ -7,6 +7,10 @@
     "@typescript-eslint/no-explicit-any": "warn",
     "semi": "error",
     "no-var": "error",
-    "no-console": "error"
+    "no-console": "error",
+    "quotes": [
+      "error",
+      "single"
+    ],
   }
 }

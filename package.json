@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "webpack && webpack serve"
+    "dev": "rimraf ./dist && webpack && webpack serve"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",

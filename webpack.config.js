@@ -1,35 +1,25 @@
 const path = require('path');
 const fs = require('fs');
-const CopyPlugin = require("copy-webpack-plugin");
+const CopyPlugin = require('copy-webpack-plugin');
 
 const generateEntries = () => {
-  const files = fs.readdirSync(path.join(__dirname, 'src'), { withFileTypes: true })
+  const scripts = fs.readdirSync(path.join(__dirname, 'src'), { withFileTypes: true })
     .filter(item => item.isDirectory())
+    .reduce((value, item) => {
+      const output = `${item.name}/main`
+      if (!value.hasOwnProperty(output)) {
+        value[output] = path.resolve(__dirname, `src/${item.name}/main.ts`)
+      }
+      return value;
+    }, {})
 
-  const scripts = files.reduce((value, item) => {
-    if (!value.hasOwnProperty(item.name)) {
-      value[item.name] = path.resolve(__dirname, `src/${item.name}/main.ts`)
-    }
-    return value;
-  }, {})
-
-  const html = files.map(item => ({
-    from: path.resolve(__dirname, `src/${item.name}/index.html`),
-    to: path.resolve(__dirname, `dist/${item.name}.html`),
-  }))
-
-  const css = files.map(item => ({
-    from: path.resolve(__dirname, `src/${item.name}/style.css`),
-    to: path.resolve(__dirname, `dist/${item.name}.css`),
-  }))
-
-  return { scripts, html, css }
+  return scripts
 }
 
 generateEntries()
 module.exports = {
   mode: 'development',
-  entry: generateEntries().scripts,
+  entry: generateEntries(),
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
@@ -44,8 +34,13 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        ...generateEntries().html,
-        ...generateEntries().css
+        {
+          from: path.resolve(__dirname, 'src/**/*.{html,css}'),
+          to({ absoluteFilename }) {
+            const fileName = absoluteFilename.split('/src/')[1];
+            return path.resolve(__dirname, `dist/${fileName}`);
+          },
+        }
       ],
     }),
   ],
