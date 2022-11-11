@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 class Scene extends THREE.Scene {
   debugger: GUI = null;
   camera: THREE.PerspectiveCamera = null;
-  renderer: THREE.Renderer = null;
+  renderer: THREE.WebGLRenderer = null;
   orbitals: OrbitControls = null;
   lights: Array<THREE.Light> = [];
   lightCount: number = 6;
@@ -28,6 +28,7 @@ class Scene extends THREE.Scene {
       alpha: true
     });
     this.renderer.setSize(this.width, this.height);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
 
     // add window resizing
     Scene.addWindowResizing(this.camera, this.renderer);
@@ -87,12 +88,12 @@ class Scene extends THREE.Scene {
   }
 
   static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
-    window.addEventListener('resize', onWindowResize, false);
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
+    window.addEventListener('resize', onWindowResize, false);
   }
 }
 
