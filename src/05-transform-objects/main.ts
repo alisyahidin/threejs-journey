@@ -38,7 +38,7 @@ class Scene extends THREE.Scene {
 
     // Adds an origin-centered grid for visual reference
     if (addGridHelper) {
-      this.add(new THREE.GridHelper(10, 10, 'red'));
+      this.add(new THREE.GridHelper(10, 10, 0xfafafa));
       this.add(new THREE.AxesHelper(3))
     }
 
@@ -64,10 +64,16 @@ class Scene extends THREE.Scene {
     }
 
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
+    let cube = new THREE.Mesh(
+      new THREE.BoxGeometry(3, 1, 1),
+      new THREE.MeshPhongMaterial({ color: 0xff9900 })
+    );
     cube.position.y = .5;
+
+    cube.rotation.reorder('YXZ')
+    cube.rotation.y = Math.PI * 0.25
+    cube.rotation.x = Math.PI * 0.25
+
     this.add(cube);
 
     // setup Debugger
