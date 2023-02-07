@@ -35,7 +35,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'src/**/*.{html,css}'),
+          from: path.resolve(__dirname, 'src/**/*.{html,css,png,svg,jpg,jpeg,gif}'),
           to({ absoluteFilename }) {
             const fileName = absoluteFilename.split('/src/')[1];
             return path.resolve(__dirname, `dist/${fileName}`);
@@ -55,7 +55,8 @@ module.exports = {
       {
         use: 'ts-loader',
         exclude: /node_modules/,
-      }
+      },
     ]
   },
+  devtool: "source-map"
 };
