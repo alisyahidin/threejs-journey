@@ -28,7 +28,7 @@ module.exports = {
     static: './dist',
     hot: true,
     watchFiles: [
-      'src/**'
+      'src/**/*'
     ]
   },
   plugins: [
