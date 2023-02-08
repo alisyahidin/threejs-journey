@@ -32,6 +32,7 @@ class Scene extends THREE.Scene {
 
     // add window resizing
     Scene.addWindowResizing(this.camera, this.renderer);
+    Scene.handleOnDoubleClick()
 
     // sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
@@ -88,13 +89,25 @@ class Scene extends THREE.Scene {
     }
   }
 
-  static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
+  static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) {
     function onWindowResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
     }
     window.addEventListener('resize', onWindowResize, false);
+  }
+
+  static handleOnDoubleClick() {
+    const requestFullScreen = () => {
+      if (!document.fullscreenElement) {
+        document.getElementById('canvas').requestFullscreen()
+      } else {
+        document.exitFullscreen()
+      }
+    }
+    window.addEventListener('dblclick', requestFullScreen, false);
   }
 }
 
