@@ -12,15 +12,20 @@ class Scene extends THREE.Scene {
   lightDistance: number = 3;
   width = window.innerWidth;
   height = window.innerHeight;
+  cube: THREE.Mesh = null;
+  clock: THREE.Clock = new THREE.Clock();
+  cursor: { x: number, y: number } = { x: 0, y: 0 }
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
 
     // setup camera
-    this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 1000);
-    this.camera.position.z = 12;
-    this.camera.position.y = 12;
-    this.camera.position.x = 12;
+    this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, .1, 100);
+    // const aspectRatio = this.width / this.height;
+    // this.camera = new THREE.OrthographicCamera(-1 * aspectRatio, 1 * aspectRatio, 1, -1, .1, 1000)
+    // this.camera.position.z = 7;
+    // this.camera.position.y = 7;
+    // this.camera.position.x = 7;
 
     // setup renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -32,13 +37,14 @@ class Scene extends THREE.Scene {
 
     // add window resizing
     Scene.addWindowResizing(this.camera, this.renderer);
+    Scene.addCursorMove(this.cursor);
 
     // sets up the camera's orbital controls
-    this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
+    // this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
 
     // Adds an origin-centered grid for visual reference
     if (addGridHelper) {
-      this.add(new THREE.GridHelper(10, 10, 'red'));
+      // this.add(new THREE.GridHelper(10, 10, 'red'));
       this.add(new THREE.AxesHelper(3))
     }
 
@@ -66,9 +72,9 @@ class Scene extends THREE.Scene {
     // Creates the geometry + materials
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    this.cube = new THREE.Mesh(geometry, material);
+    this.cube.position.y = .5;
+    this.add(this.cube);
 
     // setup Debugger
     if (debug) {
@@ -81,7 +87,7 @@ class Scene extends THREE.Scene {
 
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera');
-      cameraGroup.add(this.camera, 'fov', 20, 80);
+      // cameraGroup.add(this.camera, 'fov', 20, 80);
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open();
     }
@@ -95,14 +101,35 @@ class Scene extends THREE.Scene {
     }
     window.addEventListener('resize', onWindowResize, false);
   }
+
+  static addCursorMove(cursor: { x: number, y: number }) {
+    const canvas = document.getElementById('canvas');
+    function onWindowResize(e: MouseEvent) {
+      cursor.x = e.clientX / window.innerWidth - .5;
+      cursor.y = -(e.clientY / window.innerHeight - .5);
+    }
+    canvas.addEventListener('mousemove', onWindowResize, false);
+  }
+
+  moveCamera() {
+    this.camera.position.x = Math.sin(Math.PI * this.cursor.x * 2) * 10;
+    this.camera.position.z = Math.cos(Math.PI * this.cursor.x * 2) * 10;
+    this.camera.position.y = this.cursor.y * 8
+    this.camera.lookAt(this.cube.position)
+  }
+
+  rotateCube() {
+    this.cube.rotation.y = this.clock.getElapsedTime()
+  }
 }
 
 const scene = new Scene();
 
 function loop() {
   scene.camera.updateProjectionMatrix();
+  // scene.rotateCube();
+  scene.moveCamera();
   scene.renderer.render(scene, scene.camera);
-  scene.orbitals.update()
   requestAnimationFrame(loop);
 }
 

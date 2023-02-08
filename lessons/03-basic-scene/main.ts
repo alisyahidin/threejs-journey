@@ -35,6 +35,7 @@ class Scene extends THREE.Scene {
 
     // sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
+    this.orbitals.enableDamping = true
 
     // Adds an origin-centered grid for visual reference
     if (addGridHelper) {
@@ -101,8 +102,8 @@ const scene = new Scene();
 
 function loop() {
   scene.camera.updateProjectionMatrix();
-  scene.renderer.render(scene, scene.camera);
   scene.orbitals.update()
+  scene.renderer.render(scene, scene.camera);
   requestAnimationFrame(loop);
 }
 
