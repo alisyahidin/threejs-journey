@@ -9,7 +9,7 @@ class Scene extends THREE.Scene {
   orbitals: OrbitControls = null;
   lights: Array<THREE.Light> = [];
   lightCount: number = 6;
-  lightDistance: number = 3;
+  lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
 
@@ -39,7 +39,7 @@ class Scene extends THREE.Scene {
 
     // Adds an origin-centered grid for visual reference
     if (addGridHelper) {
-      this.add(new THREE.GridHelper(10, 10, 'red'));
+      // this.add(new THREE.GridHelper(10, 10, 'red'));
       this.add(new THREE.AxesHelper(3))
     }
 
@@ -54,7 +54,7 @@ class Scene extends THREE.Scene {
       let lightZ = this.lightDistance * Math.cos(Math.PI * 2 / this.lightCount * i);
 
       // Create a light
-      light.position.set(lightX, this.lightDistance, lightZ)
+      light.position.set(lightX, this.lightDistance / 2, lightZ)
       light.lookAt(0, 0, 0)
 
       this.add(light);
@@ -65,11 +65,26 @@ class Scene extends THREE.Scene {
     }
 
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    const ballGeometry = new THREE.SphereGeometry(1)
+    const ballMaterial = new THREE.MeshPhongMaterial({ color: 0x5844EC, wireframe: true });
+    let ball = new THREE.Mesh(ballGeometry, ballMaterial);
+    ball.position.y = .5;
+    this.add(ball);
+
+    const customPositionArray = new Float32Array([
+      0, 0, 0,
+      0, 1, 0,
+      1, 0, 0,
+    ]);
+    const customPositionAttribute = new THREE.BufferAttribute(customPositionArray, 3)
+    const customGeometry = new THREE.BufferGeometry();
+    customGeometry.setAttribute('position', customPositionAttribute)
+    const customMaterial = new THREE.MeshPhongMaterial({ color: 0x5844EC, wireframe: true });
+    const customMesh = new THREE.Mesh(customGeometry, customMaterial);
+    customMesh.position.z = 2
+    customMesh.position.y = 1
+
+    this.add(customMesh)
 
     // setup Debugger
     if (debug) {

@@ -9,7 +9,7 @@ class Scene extends THREE.Scene {
   orbitals: OrbitControls = null;
   lights: Array<THREE.Light> = [];
   lightCount: number = 6;
-  lightDistance: number = 3;
+  lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
 
@@ -54,7 +54,7 @@ class Scene extends THREE.Scene {
       let lightZ = this.lightDistance * Math.cos(Math.PI * 2 / this.lightCount * i);
 
       // Create a light
-      light.position.set(lightX, this.lightDistance, lightZ)
+      light.position.set(lightX, this.lightDistance / 2, lightZ)
       light.lookAt(0, 0, 0)
 
       this.add(light);
