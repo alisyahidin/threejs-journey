@@ -87,7 +87,7 @@ class Scene extends THREE.Scene {
       this.debugger = new GUI();
       const lightGroup = this.debugger.addFolder('Lights');
       for (let i = 0; i < this.lights.length; i++) {
-        lightGroup.add(this.lights[i], 'visible', true);
+        lightGroup.add(this.lights[i], 'visible');
       }
       lightGroup.open();
 
