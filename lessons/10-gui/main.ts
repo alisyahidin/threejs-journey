@@ -13,6 +13,8 @@ class Scene extends THREE.Scene {
   lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
+  cube: THREE.Mesh<THREE.BoxGeometry, THREE.MeshPhongMaterial> = null;
+  clock: THREE.Clock = new THREE.Clock();
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -68,13 +70,29 @@ class Scene extends THREE.Scene {
     // Creates the geometry + materials
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    this.cube = new THREE.Mesh(geometry, material);
+    this.cube.position.y = .5;
+    this.add(this.cube);
 
     // setup Debugger
     if (debug) {
       this.debugger = new GUI();
+
+      const debuggerParams = {
+        color: 0xff9900,
+        spin: () => {
+          this.rotateCubeUsingElapsedTime();
+        }
+      };
+
+      this.debugger
+        .addColor(debuggerParams, 'color')
+        .onChange(() => {
+          this.cube.material.color.set(debuggerParams.color);
+        });
+
+      this.debugger.add(debuggerParams, 'spin');
+
       const lightGroup = this.debugger.addFolder('Lights');
       for (let i = 0; i < this.lights.length; i++) {
         lightGroup.add(this.lights[i], 'visible');
@@ -87,6 +105,10 @@ class Scene extends THREE.Scene {
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open();
     }
+  }
+
+  rotateCubeUsingElapsedTime() {
+    this.cube.rotation.y = this.clock.getElapsedTime()
   }
 
   static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
