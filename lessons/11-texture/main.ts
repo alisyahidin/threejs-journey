@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import GUI from 'lil-gui';
-
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 class Scene extends THREE.Scene {
@@ -13,6 +12,8 @@ class Scene extends THREE.Scene {
   lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
+  loadingManager: THREE.LoadingManager;
+  textureLoader: THREE.TextureLoader;
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -65,12 +66,55 @@ class Scene extends THREE.Scene {
       this.add(new THREE.PointLightHelper(light, .5, 0xff9900));
     }
 
+    // Create Textures Manually
+    // const image = new Image();
+    // const texture = new THREE.Texture(image)
+    // image.onload = () => { texture.needsUpdate = true };
+    // image.src = '/door-texture/basecolor.jpg'
+
+    this.loadingManager = new THREE.LoadingManager()
+    this.loadingManager.onProgress = console.log
+    this.textureLoader = new THREE.TextureLoader(this.loadingManager)
+
+    const colorTexture = this.textureLoader.load('/texture/door/basecolor.jpg')
+    colorTexture.repeat.x = 2
+    colorTexture.repeat.y = 3
+    colorTexture.wrapS = THREE.MirroredRepeatWrapping
+    colorTexture.wrapT = THREE.MirroredRepeatWrapping
+
+    colorTexture.offset.x = 2
+    colorTexture.offset.y = 2
+
+    colorTexture.rotation = Math.PI * .5
+    colorTexture.center.x = 0.5
+    colorTexture.center.y = 0.5
+
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    const cube1Geometry = new THREE.BoxGeometry(1, 1, 1);
+    console.log(cube1Geometry.attributes.uv)
+    const cube1Material = new THREE.MeshPhongMaterial({ map: colorTexture });
+    const cube1 = new THREE.Mesh(cube1Geometry, cube1Material);
+    cube1.position.y = .5;
+    cube1.position.x = -1;
+    this.add(cube1);
+
+
+    // filter & mipmapping
+    const minecraftTexture = this.textureLoader.load('/texture/checkerboard-8x8.png')
+    // make small resolution texture become sharp
+    minecraftTexture.magFilter = THREE.LinearFilter
+
+    // minecraftTexture.minFilter = THREE.NearestFilter
+    // minecraftTexture.generateMipmaps = false
+
+
+    const cube2Geometry = new THREE.BoxGeometry(1, 1, 1);
+    console.log(cube2Geometry.attributes.uv)
+    const cube2Material = new THREE.MeshPhongMaterial({ map: minecraftTexture });
+    const cube2 = new THREE.Mesh(cube2Geometry, cube2Material);
+    cube2.position.y = .5;
+    cube2.position.x = 2;
+    this.add(cube2);
 
     // setup Debugger
     if (debug) {
@@ -79,13 +123,50 @@ class Scene extends THREE.Scene {
       for (let i = 0; i < this.lights.length; i++) {
         lightGroup.add(this.lights[i], 'visible');
       }
-      lightGroup.open();
+      lightGroup.close()
 
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera');
       cameraGroup.add(this.camera, 'fov', 20, 80);
       cameraGroup.add(this.camera, 'zoom', 0, 1)
-      cameraGroup.open();
+      cameraGroup.close()
+
+      // texture transform
+      const transformGroup = this.debugger.addFolder('Texture transform')
+      transformGroup.add(colorTexture, 'rotation', 0, Math.PI * 2, 0.1)
+      transformGroup.add(colorTexture.offset, 'x', 1, 5, 0.5).name('Offset X')
+      transformGroup.add(colorTexture.offset, 'y', 1, 5, 0.5).name('Offset Y')
+      transformGroup.add(colorTexture.center, 'x', 0, 5, 0.5).name('Center X')
+      transformGroup.add(colorTexture.center, 'y', 0, 5, 0.5).name('Center Y')
+      transformGroup.add(colorTexture.repeat, 'x', 1, 5, 0.5).name('Repeat X')
+      transformGroup.add(colorTexture.repeat, 'y', 1, 5, 0.5).name('Repeat Y')
+      transformGroup.open()
+
+      // magFilter controller
+      const params = {
+        linear: true,
+        nearest: false,
+      }
+      const updateParams = (key: keyof typeof params) => {
+        for (let i in params) {
+          params[i as keyof typeof params] = false
+        }
+        params[key] = true
+        switch (key) {
+          case 'linear':
+            minecraftTexture.magFilter = THREE.LinearFilter
+            minecraftTexture.needsUpdate = true
+            break;
+          case 'nearest':
+            minecraftTexture.magFilter = THREE.NearestFilter
+            minecraftTexture.needsUpdate = true
+            break;
+        }
+      }
+      const magFilterGroup = this.debugger.addFolder('Mag Filter')
+      magFilterGroup.add(params, 'linear').name('Linear Filter').listen().onChange(() => updateParams('linear'))
+      magFilterGroup.add(params, 'nearest').name('Nearest Filter').listen().onChange(() => updateParams('nearest'))
+      magFilterGroup.open()
     }
   }
 
