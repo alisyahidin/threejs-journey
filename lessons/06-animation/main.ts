@@ -48,7 +48,7 @@ class Scene extends THREE.Scene {
     }
 
     // set the background color
-    this.background = new THREE.Color(0xefefef);
+    this.background = new THREE.Color(0x000);
 
     // create the lights
     for (let i = 0; i < this.lightCount; i++) {

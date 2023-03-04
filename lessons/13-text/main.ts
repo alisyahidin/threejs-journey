@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import GUI from 'lil-gui';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { TeapotGeometry } from 'three/examples/jsm/geometries/TeapotGeometry';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 
 class Scene extends THREE.Scene {
   debugger: GUI = null;
@@ -9,10 +12,12 @@ class Scene extends THREE.Scene {
   renderer: THREE.WebGLRenderer = null;
   orbitals: OrbitControls = null;
   lights: Array<THREE.Light> = [];
-  lightCount: number = 6;
+  lightCount: number = 0;
   lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
+  textureLoader: THREE.TextureLoader = new THREE.TextureLoader;
+  fontLoader: FontLoader = new FontLoader();
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -40,12 +45,12 @@ class Scene extends THREE.Scene {
 
     // Adds an origin-centered grid for visual reference
     if (addGridHelper) {
-      this.add(new THREE.GridHelper(10, 10, 'red'));
-      this.add(new THREE.AxesHelper(3))
+      // this.add(new THREE.GridHelper(10, 10, 'red'));
+      // this.add(new THREE.AxesHelper(3))
     }
 
     // set the background color
-    this.background = new THREE.Color(0xefefef);
+    this.background = new THREE.Color(0x000);
 
     // create the lights
     for (let i = 0; i < this.lightCount; i++) {
@@ -65,12 +70,62 @@ class Scene extends THREE.Scene {
       this.add(new THREE.PointLightHelper(light, .5, 0xff9900));
     }
 
+    const matcap = this.textureLoader.load('/texture/matcaps/4.png');
+    const objectMaterial = new THREE.MeshMatcapMaterial({ matcap })
+
+    this.fontLoader.load(
+      '/fonts/helvetiker_regular.typeface.json',
+      (font) => {
+        const textGeometry = new TextGeometry(
+          'Hello World!',
+          {
+            font,
+            size: 0.5,
+            height: 0.2,
+            curveSegments: 6,
+            bevelEnabled: true,
+            bevelThickness: 0.03,
+            bevelSize: 0.02,
+            bevelOffset: 0,
+            bevelSegments: 5,
+          }
+        )
+        // get bounding box of text geometry to make it centered
+        // textGeometry.computeBoundingBox()
+        // console.log(textGeometry.boundingBox)
+        // textGeometry.translate(
+        //   -(textGeometry.boundingBox.max.x - 0.02) * 0.5,
+        //   -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
+        //   -(textGeometry.boundingBox.max.z - 0.03) * 0.5,
+        // )
+        textGeometry.center()
+
+        const text = new THREE.Mesh(textGeometry, objectMaterial)
+        this.add(text)
+      }
+    )
+
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    const teapotGeometry = new TeapotGeometry(0.2);
+    for (let i = 0; i < 100; i++) {
+      const teapot = new THREE.Mesh(
+        teapotGeometry,
+        objectMaterial
+      );
+
+      teapot.position.x = (Math.random() - 0.5) * 15;
+      teapot.position.y = (Math.random() - 0.5) * 15;
+      teapot.position.z = (Math.random() - 0.5) * 15;
+
+      const scale = Math.max(0.9, Math.random() * 1.5)
+      teapot.scale.set(scale, scale, scale)
+
+      teapot.rotation.x = Math.random() * Math.PI
+      teapot.rotation.y = Math.random() * Math.PI
+      teapot.rotation.z = Math.random() * Math.PI
+
+      this.add(teapot);
+    }
 
     // setup Debugger
     if (debug) {
@@ -79,13 +134,13 @@ class Scene extends THREE.Scene {
       for (let i = 0; i < this.lights.length; i++) {
         lightGroup.add(this.lights[i], 'visible');
       }
-      lightGroup.open();
+      lightGroup.close();
 
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera');
       cameraGroup.add(this.camera, 'fov', 20, 80);
       cameraGroup.add(this.camera, 'zoom', 0, 1)
-      cameraGroup.open();
+      cameraGroup.close();
     }
   }
 
