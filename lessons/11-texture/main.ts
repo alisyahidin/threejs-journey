@@ -76,7 +76,7 @@ class Scene extends THREE.Scene {
     this.loadingManager.onProgress = console.log
     this.textureLoader = new THREE.TextureLoader(this.loadingManager)
 
-    const colorTexture = this.textureLoader.load('/texture/door/basecolor.jpg')
+    const colorTexture = this.textureLoader.load('/texture/door/color.jpg')
     colorTexture.repeat.x = 2
     colorTexture.repeat.y = 3
     colorTexture.wrapS = THREE.MirroredRepeatWrapping
@@ -92,7 +92,7 @@ class Scene extends THREE.Scene {
     // Creates the geometry + materials
     const cube1Geometry = new THREE.BoxGeometry(1, 1, 1);
     console.log(cube1Geometry.attributes.uv)
-    const cube1Material = new THREE.MeshPhongMaterial({ map: colorTexture });
+    const cube1Material = new THREE.MeshBasicMaterial({ map: colorTexture });
     const cube1 = new THREE.Mesh(cube1Geometry, cube1Material);
     cube1.position.y = .5;
     cube1.position.x = -1;
