@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "predev": "npm run generate:pages",
+    "prebuild": "npm run generate:pages",
+    "generate:pages": "node scripts/generate-pages.js",
     "preview": "vite preview"
   },
   "devDependencies": {
