@@ -38,6 +38,10 @@ const routes = [
   {
     "title": "13 Text",
     "path": "/lessons/13-text/index.html"
+  },
+  {
+    "title": "15 Light",
+    "path": "/lessons/15-light/index.html"
   }
 ] as const
 
