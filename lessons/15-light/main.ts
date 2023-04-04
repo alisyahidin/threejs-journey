@@ -2,17 +2,29 @@ import * as THREE from 'three';
 import GUI from 'lil-gui';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { RectAreaLightHelper } from 'three/examples/jsm/helpers/RectAreaLightHelper.js'
 
 class Scene extends THREE.Scene {
-  debugger: GUI = null;
+  debugger: GUI = new GUI();
   camera: THREE.PerspectiveCamera = null;
   renderer: THREE.WebGLRenderer = null;
   orbitals: OrbitControls = null;
-  lights: Array<THREE.Light> = [];
-  lightCount: number = 6;
+  lights = {
+    ambient: new THREE.AmbientLight(0xffffff, 0.5),
+    directional: new THREE.DirectionalLight(0x00ffc, 0.5),
+    hemisphere: new THREE.HemisphereLight(0xff0000, 0x00ff00, 0.3),
+    point: new THREE.PointLight(0xfbff00, 0.5),
+    reactarea: new THREE.RectAreaLight(0xbfff80, 2, 1, 1),
+    spotlight: new THREE.SpotLight(0x78ff00, 0.5, 10, Math.PI * 0.1, 0.25, 1),
+  };
+  lightCount: number = 0;
   lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
+  cube: THREE.Mesh;
+  donut: THREE.Mesh;
+  plane: THREE.Mesh;
+  shpere: THREE.Mesh;
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -47,46 +59,94 @@ class Scene extends THREE.Scene {
     // set the background color
     this.background = new THREE.Color(0x000);
 
-    // create the lights
-    for (let i = 0; i < this.lightCount; i++) {
-      // Positions evenly in a circle pointed at the origin
-      const light = new THREE.PointLight(0xffffff, 1);
-      let lightX = this.lightDistance * Math.sin(Math.PI * 2 / this.lightCount * i);
-      let lightZ = this.lightDistance * Math.cos(Math.PI * 2 / this.lightCount * i);
-
-      // Create a light
-      light.position.set(lightX, this.lightDistance / 2, lightZ)
-      light.lookAt(0, 0, 0)
-
-      this.add(light);
-
-      this.lights.push(light);
-      // Visual helpers to indicate light positions
-      this.add(new THREE.PointLightHelper(light, .5, 0xff9900));
-    }
-
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    const material = new THREE.MeshStandardMaterial();
+    material.roughness = 0.4
+    material.flatShading = true
+
+    this.cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+    this.cube.position.y = 1;
+    this.add(this.cube);
+
+    this.shpere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), material);
+    this.shpere.position.y = 1.5;
+    this.shpere.position.x = -2;
+    this.add(this.shpere);
+
+    this.donut = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.2, 16, 32), material);
+    this.donut.position.y = 1;
+    this.donut.position.x = 2;
+    this.add(this.donut);
+
+    this.plane = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), material);
+    this.plane.rotateX(-Math.PI * 0.5)
+    this.add(this.plane);
+
+    this.lights.directional.position.set(-0.5, 0.8, 0)
+    this.lights.point.position.set(-2, 0.2, 1)
+    this.lights.reactarea.position.set(2, 1, 1)
+    this.lights.reactarea.lookAt(new THREE.Vector3())
+    this.lights.spotlight.position.set(1, 4, 4)
+    Object.values(this.lights).forEach(light => {
+      this.add(light)
+    })
+
+    const pointLightHelper = new THREE.PointLightHelper(this.lights.point, 0.2)
+    this.add(pointLightHelper)
+
+    const direactionalLightHelper = new THREE.DirectionalLightHelper(this.lights.directional, 0.2)
+    this.add(direactionalLightHelper)
+
+    const spotLightHelper = new THREE.SpotLightHelper(this.lights.spotlight, 0.2)
+    this.add(spotLightHelper)
+
+    const reactareaLightHelper = new RectAreaLightHelper(this.lights.reactarea, 0.2)
+    this.add(reactareaLightHelper)
 
     // setup Debugger
     if (debug) {
-      this.debugger = new GUI();
-      const lightGroup = this.debugger.addFolder('Lights');
-      for (let i = 0; i < this.lights.length; i++) {
-        lightGroup.add(this.lights[i], 'visible');
-      }
-      lightGroup.open();
-
       // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera');
       cameraGroup.add(this.camera, 'fov', 20, 80);
       cameraGroup.add(this.camera, 'zoom', 0, 1)
-      cameraGroup.open();
+      cameraGroup.close();
+
+      const params: Record<keyof typeof this.lights, { color: number, groundColor?: number }> = {
+        ambient: { color: this.lights.ambient.color.getHex() },
+        directional: { color: this.lights.directional.color.getHex() },
+        hemisphere: { color: this.lights.hemisphere.color.getHex(), groundColor: this.lights.hemisphere.groundColor.getHex() },
+        point: { color: this.lights.point.color.getHex() },
+        reactarea: { color: this.lights.reactarea.color.getHex() },
+        spotlight: { color: this.lights.spotlight.color.getHex() },
+      }
+      Object.keys(this.lights).forEach((lightType: keyof typeof this.lights) => {
+        const lightGroup = this.debugger.addFolder(lightType[0].toLocaleUpperCase() + lightType.substring(1));
+        lightGroup.add(this.lights[lightType], 'visible');
+        lightGroup
+          .addColor(params[lightType], 'color')
+          .onChange(() => {
+            this.lights[lightType].color.set(params[lightType].color)
+          })
+        if (params[lightType].hasOwnProperty('groundColor')) {
+          lightGroup
+            .addColor(params[lightType], 'groundColor')
+            .onChange(() => {
+              (this.lights[lightType] as THREE.HemisphereLight).groundColor.set(params[lightType].color)
+            })
+        }
+        lightGroup.add(this.lights[lightType], 'intensity', 0, 1);
+        lightGroup.open();
+      })
     }
+  }
+
+  animate() {
+    this.shpere.rotation.x += 0.01;
+    this.shpere.rotation.y += 0.01;
+    this.cube.rotation.x += 0.01;
+    this.cube.rotation.y += 0.01;
+    this.donut.rotation.x += 0.01;
+    this.donut.rotation.y += 0.01;
   }
 
   static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
@@ -105,6 +165,7 @@ function loop() {
   scene.camera.updateProjectionMatrix();
   scene.orbitals.update()
   scene.renderer.render(scene, scene.camera);
+  scene.animate()
   requestAnimationFrame(loop);
 }
 
