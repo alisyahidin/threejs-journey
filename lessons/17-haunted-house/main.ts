@@ -4,13 +4,10 @@ import GUI from 'lil-gui';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 class Scene extends THREE.Scene {
-  debugger: GUI = null;
+  debugger: GUI = new GUI();
   camera: THREE.PerspectiveCamera = null;
   renderer: THREE.WebGLRenderer = null;
   orbitals: OrbitControls = null;
-  lights: Array<THREE.Light> = [];
-  lightCount: number = 6;
-  lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
 
@@ -38,50 +35,82 @@ class Scene extends THREE.Scene {
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
     this.orbitals.enableDamping = true
 
-    // Adds an origin-centered grid for visual reference
-    if (addGridHelper) {
-      this.add(new THREE.GridHelper(10, 10, 'red'));
-      this.add(new THREE.AxesHelper(3))
-    }
-
     // set the background color
     this.background = new THREE.Color(0x000);
 
-    // create the lights
-    for (let i = 0; i < this.lightCount; i++) {
-      // Positions evenly in a circle pointed at the origin
-      const light = new THREE.PointLight(0xffffff, 1);
-      let lightX = this.lightDistance * Math.sin(Math.PI * 2 / this.lightCount * i);
-      let lightZ = this.lightDistance * Math.cos(Math.PI * 2 / this.lightCount * i);
+    const ambientLight = new THREE.AmbientLight(0xb9d5ff, 0.2)
+    this.add(ambientLight)
 
-      // Create a light
-      light.position.set(lightX, this.lightDistance / 2, lightZ)
-      light.lookAt(0, 0, 0)
+    const moonLight = new THREE.DirectionalLight(0xb9d5ff, 0.2)
+    moonLight.position.set(4, 5, -2)
+    this.add(moonLight)
 
-      this.add(light);
-
-      this.lights.push(light);
-      // Visual helpers to indicate light positions
-      this.add(new THREE.PointLightHelper(light, .5, 0xff9900));
-    }
+    const doorLight = new THREE.PointLight(0xff7d46, 1, 7)
+    doorLight.position.set(0, 2.2, 2.7)
+    this.add(doorLight)
 
     // Creates the geometry + materials
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff9900 });
-    let cube = new THREE.Mesh(geometry, material);
-    cube.position.y = .5;
-    this.add(cube);
+    const plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(18, 18),
+      new THREE.MeshStandardMaterial({ color: 0x1d963b })
+    )
+    plane.rotation.x = -Math.PI * 0.5
+    this.add(plane)
+
+    const house = new THREE.Group()
+    this.add(house)
+
+    const walls = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 2.5, 4),
+      new THREE.MeshStandardMaterial({ color: '#ac8e82' })
+    )
+    walls.position.y = 1.25
+    house.add(walls)
+
+    const roof = new THREE.Mesh(
+      new THREE.ConeGeometry(3.5, 1, 4),
+      new THREE.MeshStandardMaterial({ color: '#b35f45' })
+    )
+    roof.rotation.y = Math.PI * 0.25
+    roof.position.y = 2.5 + 0.5
+    house.add(roof)
+
+    const door = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      new THREE.MeshStandardMaterial({ color: '#aa7b7b' })
+    )
+    door.position.y = 1
+    door.position.z = 2 + 0.01
+    house.add(door)
+
+    // Graves
+    const graves = new THREE.Group()
+    this.add(graves)
+
+    const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2)
+    const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1' })
+
+    for (let i = 0; i < 25; i++) {
+      const radius = 3 + Math.random() * 5
+      const x = Math.cos(i + 1) * radius
+      const z = Math.sin(i + 1) * radius
+
+      // Create the mesh
+      const grave = new THREE.Mesh(graveGeometry, graveMaterial)
+
+      // Position
+      grave.position.set(x, 0.3, z)
+
+      // Rotation
+      grave.rotation.z = (Math.random() - 0.5) * 0.2
+      grave.rotation.y = (Math.random() - 0.5) * 0.4
+
+      // Add to the graves container
+      graves.add(grave)
+    }
 
     // setup Debugger
     if (debug) {
-      this.debugger = new GUI();
-      const lightGroup = this.debugger.addFolder('Lights');
-      for (let i = 0; i < this.lights.length; i++) {
-        lightGroup.add(this.lights[i], 'visible');
-      }
-      lightGroup.open();
-
-      // Add camera to debugger
       const cameraGroup = this.debugger.addFolder('Camera');
       cameraGroup.add(this.camera, 'fov', 20, 80);
       cameraGroup.add(this.camera, 'zoom', 0, 1)
