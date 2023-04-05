@@ -62,6 +62,7 @@ class Scene extends THREE.Scene {
     this.add(light)
 
     const lightShadowHelper = new THREE.CameraHelper(light.shadow.camera)
+    lightShadowHelper.visible = false
     this.add(lightShadowHelper)
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.3)
@@ -73,6 +74,7 @@ class Scene extends THREE.Scene {
     this.add(spotLight)
 
     const spotLightHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+    spotLightHelper.visible = false
     this.add(spotLightHelper)
 
     const pointLight = new THREE.PointLight(0xffffff, 0.3)
@@ -82,6 +84,7 @@ class Scene extends THREE.Scene {
     this.add(pointLight)
 
     const pointLightHelper = new THREE.CameraHelper(pointLight.shadow.camera)
+    pointLightHelper.visible = false
     this.add(pointLightHelper)
 
     // Creates the geometry + materials
