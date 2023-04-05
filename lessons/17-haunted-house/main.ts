@@ -10,6 +10,7 @@ class Scene extends THREE.Scene {
   orbitals: OrbitControls = null;
   width = window.innerWidth;
   height = window.innerHeight;
+  textureLoader = new THREE.TextureLoader()
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -46,6 +47,40 @@ class Scene extends THREE.Scene {
     // this.background = new THREE.Color(0x262837);
     this.renderer.setClearColor(0x262837);
 
+    // Texture
+    const doorColorTexture = this.textureLoader.load('/texture/door/color.jpg')
+    const doorAlphaTexture = this.textureLoader.load('/texture/door/alpha.jpg')
+    const doorAmbientOcclusionTexture = this.textureLoader.load('/texture/door/ambientOcclusion.jpg')
+    const doorHeightTexture = this.textureLoader.load('/texture/door/height.jpg')
+    const doorNormalTexture = this.textureLoader.load('/texture/door/normal.jpg')
+    const doorMetalnessTexture = this.textureLoader.load('/texture/door/metalness.jpg')
+    const doorRoughnessTexture = this.textureLoader.load('/texture/door/roughness.jpg')
+
+    const bricksColorTexture = this.textureLoader.load('/texture/bricks/color.jpg')
+    const bricksAmbientOcclusionTexture = this.textureLoader.load('/texture/bricks/ambientOcclusion.jpg')
+    const bricksNormalTexture = this.textureLoader.load('/texture/bricks/normal.jpg')
+    const bricksRoughnessTexture = this.textureLoader.load('/texture/bricks/roughness.jpg')
+
+    const grassColorTexture = this.textureLoader.load('/texture/grass/color.jpg')
+    const grassAmbientOcclusionTexture = this.textureLoader.load('/texture/grass/ambientOcclusion.jpg')
+    const grassNormalTexture = this.textureLoader.load('/texture/grass/normal.jpg')
+    const grassRoughnessTexture = this.textureLoader.load('/texture/grass/roughness.jpg')
+
+    grassColorTexture.repeat.set(24, 24)
+    grassAmbientOcclusionTexture.repeat.set(24, 24)
+    grassNormalTexture.repeat.set(24, 24)
+    grassRoughnessTexture.repeat.set(24, 24)
+
+    grassColorTexture.wrapS = THREE.RepeatWrapping
+    grassAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
+    grassNormalTexture.wrapS = THREE.RepeatWrapping
+    grassRoughnessTexture.wrapS = THREE.RepeatWrapping
+
+    grassColorTexture.wrapT = THREE.RepeatWrapping
+    grassAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping
+    grassNormalTexture.wrapT = THREE.RepeatWrapping
+    grassRoughnessTexture.wrapT = THREE.RepeatWrapping
+
     const ambientLight = new THREE.AmbientLight(0xb9d5ff, 0.2)
     this.add(ambientLight)
 
@@ -54,24 +89,38 @@ class Scene extends THREE.Scene {
     this.add(moonLight)
 
     const doorLight = new THREE.PointLight(0xff7d46, 1, 7)
-    doorLight.position.set(0, 2.2, 2.7)
+    doorLight.position.set(0, 2.2, 2.5)
     this.add(doorLight)
 
     // Creates the geometry + materials
-    const plane = new THREE.Mesh(
+    const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(36 * 2, 36 * 2),
-      new THREE.MeshStandardMaterial({ color: 0x1d963b })
+      new THREE.MeshStandardMaterial({
+        map: grassColorTexture,
+        aoMap: grassAmbientOcclusionTexture,
+        normalMap: grassNormalTexture,
+        roughnessMap: grassRoughnessTexture,
+      })
     )
-    plane.rotation.x = -Math.PI * 0.5
-    this.add(plane)
+    // @ts-ignore
+    floor.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(floor.geometry.attributes.uv.array, 2))
+    floor.rotation.x = -Math.PI * 0.5
+    this.add(floor)
 
     const house = new THREE.Group()
     this.add(house)
 
     const walls = new THREE.Mesh(
       new THREE.BoxGeometry(4, 2.5, 4),
-      new THREE.MeshStandardMaterial({ color: '#ac8e82' })
+      new THREE.MeshStandardMaterial({
+        map: bricksColorTexture,
+        aoMap: bricksAmbientOcclusionTexture,
+        normalMap: bricksNormalTexture,
+        roughnessMap: bricksRoughnessTexture,
+      })
     )
+    // @ts-ignore
+    walls.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(walls.geometry.attributes.uv.array, 2))
     walls.position.y = 1.25
     house.add(walls)
 
@@ -84,9 +133,21 @@ class Scene extends THREE.Scene {
     house.add(roof)
 
     const door = new THREE.Mesh(
-      new THREE.PlaneGeometry(2, 2),
-      new THREE.MeshStandardMaterial({ color: '#aa7b7b' })
+      new THREE.PlaneGeometry(2.2, 2.2, 100, 100),
+      new THREE.MeshStandardMaterial({
+        map: doorColorTexture,
+        transparent: true,
+        alphaMap: doorAlphaTexture,
+        aoMap: doorAmbientOcclusionTexture,
+        displacementMap: doorHeightTexture,
+        displacementScale: 0.1,
+        normalMap: doorNormalTexture,
+        metalnessMap: doorMetalnessTexture,
+        roughnessMap: doorRoughnessTexture,
+      })
     )
+    // @ts-ignore
+    door.geometry.setAttribute('uv2', new THREE.Float32BufferAttribute(door.geometry.attributes.uv.array, 2))
     door.position.y = 1
     door.position.z = 2 + 0.01
     house.add(door)
