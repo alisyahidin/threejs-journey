@@ -11,6 +11,9 @@ class Scene extends THREE.Scene {
   lightDistance: number = 7;
   width = window.innerWidth;
   height = window.innerHeight;
+  sphere: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>
+  sphereShadow: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>
+  clock = new THREE.Clock()
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -82,13 +85,24 @@ class Scene extends THREE.Scene {
     this.add(pointLightHelper)
 
     // Creates the geometry + materials
-    let sphere = new THREE.Mesh(
+    this.sphere = new THREE.Mesh(
       new THREE.SphereGeometry(0.5, 12, 12),
       new THREE.MeshStandardMaterial({ color: 0xf542d1, roughness: 0.4 })
     );
-    sphere.position.y = 0.5;
-    sphere.castShadow = true
-    this.add(sphere);
+    this.sphere.position.y = 0.5;
+    this.sphere.castShadow = true
+    this.add(this.sphere);
+
+    // Baked shadow
+    const alphaMap = new THREE.TextureLoader().load('/texture/simple-shadow.jpg')
+
+    this.sphereShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.7, 1.7),
+      new THREE.MeshBasicMaterial({ color: 0x000000, alphaMap, transparent: true })
+    )
+    this.sphereShadow.rotation.x = -Math.PI * 0.5
+    this.sphereShadow.position.y = 0.01
+    this.add(this.sphereShadow)
 
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(8, 8),
@@ -146,7 +160,7 @@ class Scene extends THREE.Scene {
             this.renderer.shadowMap.type = THREE.VSMShadowMap
             break;
         }
-        sphere.material.needsUpdate = true
+        this.sphere.material.needsUpdate = true
         plane.material.needsUpdate = true
       }
       lightShadowGroup.add(params, 'basic').name('BasicShadowMap').listen().onChange(() => updateParams('basic'))
@@ -157,9 +171,9 @@ class Scene extends THREE.Scene {
 
 
       const meshGroup = this.debugger.addFolder('Objects');
-      meshGroup.add(sphere.position, 'x', -2, 2).name('Sphere X')
-      meshGroup.add(sphere.position, 'z', -2, 2).name('Sphere Z')
-      meshGroup.add(sphere.position, 'y', -2, 2).name('Sphere Y')
+      meshGroup.add(this.sphere.position, 'x', -2, 2).name('Sphere X')
+      meshGroup.add(this.sphere.position, 'z', -2, 2).name('Sphere Z')
+      meshGroup.add(this.sphere.position, 'y', -2, 2).name('Sphere Y')
       meshGroup.close();
 
       // Add camera to debugger
@@ -168,6 +182,17 @@ class Scene extends THREE.Scene {
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.close();
     }
+  }
+
+  animate() {
+    const elapsedTime = this.clock.getElapsedTime()
+    this.sphere.position.x = Math.cos(elapsedTime) * 2
+    this.sphere.position.z = Math.sin(elapsedTime) * 2
+    this.sphere.position.y = (Math.abs(Math.sin(elapsedTime * 3))) + 0.5
+
+    this.sphereShadow.position.x = this.sphere.position.x
+    this.sphereShadow.position.z = this.sphere.position.z
+    this.sphereShadow.material.opacity = (1 - this.sphere.position.y) * 0.7
   }
 
   static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
@@ -186,6 +211,7 @@ function loop() {
   scene.camera.updateProjectionMatrix();
   scene.orbitals.update()
   scene.renderer.render(scene, scene.camera);
+  scene.animate()
   requestAnimationFrame(loop);
 }
 
