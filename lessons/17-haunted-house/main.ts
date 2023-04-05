@@ -20,6 +20,10 @@ class Scene extends THREE.Scene {
     this.camera.position.y = 12;
     this.camera.position.x = 12;
 
+    // fog
+    const fog = new THREE.Fog(0x262837, 15, 30)
+    this.fog = fog
+
     // setup renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas: document.getElementById('canvas') as HTMLCanvasElement,
@@ -33,10 +37,14 @@ class Scene extends THREE.Scene {
 
     // sets up the camera's orbital controls
     this.orbitals = new OrbitControls(this.camera, this.renderer.domElement)
+    this.orbitals.maxPolarAngle = Math.PI / 2.2
+    this.orbitals.minDistance = 5
+    this.orbitals.maxDistance = 33
     this.orbitals.enableDamping = true
 
     // set the background color
-    this.background = new THREE.Color(0x000);
+    // this.background = new THREE.Color(0x262837);
+    this.renderer.setClearColor(0x262837);
 
     const ambientLight = new THREE.AmbientLight(0xb9d5ff, 0.2)
     this.add(ambientLight)
@@ -51,7 +59,7 @@ class Scene extends THREE.Scene {
 
     // Creates the geometry + materials
     const plane = new THREE.Mesh(
-      new THREE.PlaneGeometry(18, 18),
+      new THREE.PlaneGeometry(36 * 2, 36 * 2),
       new THREE.MeshStandardMaterial({ color: 0x1d963b })
     )
     plane.rotation.x = -Math.PI * 0.5
@@ -91,7 +99,7 @@ class Scene extends THREE.Scene {
     const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1' })
 
     for (let i = 0; i < 25; i++) {
-      const radius = 3 + Math.random() * 5
+      const radius = 5 + Math.random() * 9
       const x = Math.cos(i + 1) * radius
       const z = Math.sin(i + 1) * radius
 
