@@ -2,15 +2,15 @@ import * as THREE from 'three'
 
 const getRadian = (angle: number) => angle * Math.PI / 180
 
-const app = document.getElementById('app');
-app?.classList.add('[&>*:nth-child(odd)]:bg-purple-400', '[&>*:nth-child(even)]:bg-blue-300')
+const wrapper = document.getElementById('circular');
+wrapper?.classList.add('[&>*:nth-child(odd)]:bg-purple-400', '[&>*:nth-child(even)]:bg-blue-300')
 
 const clock = new THREE.Clock()
 
 const dots: HTMLDivElement[] = [];
 
 const params = {
-  radius: 300,
+  radius: 200,
   length: 12,
 }
 
@@ -18,13 +18,13 @@ for (let i = 0; i < params.length; i++) {
   const radian = getRadian(360 / params.length * i)
 
   dots[i] = document.createElement('div');
-  dots[i].className = 'h-6 w-6 absolute inset-0 m-auto rounded-lg';
+  dots[i].className = 'h-6 w-6 absolute inset-0 m-auto rounded-full';
 
   const x = Math.cos(radian) * params.radius;
   const y = Math.sin(radian) * params.radius;
   dots[i].style.transform = `translate(${x}px, ${y}px)`
 
-  app?.appendChild(dots[i]);
+  wrapper?.appendChild(dots[i]);
 }
 
 const loop = () => {

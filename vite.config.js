@@ -2,8 +2,13 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import fs from 'node:fs'
 
-const pages = fs.readdirSync('lessons').reduce((prev, current) => {
+const lessons = fs.readdirSync('lessons').reduce((prev, current) => {
   prev[`${current}`] = `lessons/${current}/index.html`;
+  return { ...prev };
+}, {})
+
+const playground = fs.readdirSync('playground').reduce((prev, current) => {
+  prev[`${current}`] = `playground/${current}/index.html`;
   return { ...prev };
 }, {})
 
@@ -12,7 +17,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        ...pages
+        ...lessons,
+        ...playground,
       },
     },
   },
