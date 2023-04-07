@@ -23,6 +23,7 @@
     "vite": "^4.1.1"
   },
   "dependencies": {
+    "bezier-easing": "^2.1.0",
     "gsap": "3.5.1",
     "lil-gui": "^0.18.0",
     "paper": "^0.12.17",
