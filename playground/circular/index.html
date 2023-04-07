@@ -7,13 +7,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Circular | ThreeJS Journey Playground</title>
   <script type="module" src="/tailwind.ts"></script>
+  <style>
+    #circular {
+      background: conic-gradient(blue 0deg 90deg, rgb(116, 18, 18) 90deg 180deg, pink 180deg 270deg, purple 270deg 360deg);
+    }
+  </style>
 </head>
 
 <body>
   <div class="relative h-screen bg-gray-100" id="circular"></div>
   <canvas class="relative h-screen w-full bg-gray-900" resize id="circle"></canvas>
+  <canvas class="relative h-screen w-full bg-gray-400" resize id="wheel"></canvas>
   <script type="module" src="./circular.ts"></script>
   <script type="module" src="./circle.ts"></script>
+  <script type="module" src="./wheel.ts"></script>
 </body>
 
 </html>

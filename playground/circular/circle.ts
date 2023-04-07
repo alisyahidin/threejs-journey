@@ -50,7 +50,7 @@ canvas.onmousemove = function (e: MouseEvent) {
     -(paper.view.center.x - e.pageX),
     -((e.pageY - canvas.offsetTop) - paper.view.center.y),
   )
-
+  console.log(pointer.segments[1].point, cursorPoint.angle)
   const x = Math.cos((cursorPoint.angle * Math.PI / 180)) * radius
   const y = Math.sin((cursorPoint.angle * Math.PI / 180)) * radius
 
