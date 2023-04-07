@@ -46,3 +46,48 @@ foods.forEach((food, i) => {
 paper.view.onResize = () => {
   wheel.position = paper.view.center
 }
+
+// control animation
+
+let duration = 8;
+let isClicked = false
+let isAnimating = false
+let starttime = 0;
+
+canvas.onclick = () => {
+  if (isAnimating) return
+
+  isClicked = !isClicked
+
+  if (isClicked) {
+    paper.view.onFrame = animate
+  } else {
+    paper.view.onFrame = null
+    starttime = 0
+  }
+}
+
+function animate(event) {
+  if (isClicked && starttime === 0) {
+    starttime = event.time;
+    isAnimating = true
+    canvas.classList.add('cursor-not-allowed')
+  }
+
+  const runtime = event.time - starttime;
+  const relativeProgress = runtime / duration
+
+  const rotation = 30 * (relativeProgress <= 0.5 ? relativeProgress : 1 - relativeProgress)
+
+  if (isClicked) {
+    wheel.rotate(rotation)
+  }
+
+  if (relativeProgress > 1) {
+    canvas.classList.remove('cursor-not-allowed')
+    isClicked = false
+    starttime = 0
+    isAnimating = false
+    paper.view.onFrame = null
+  }
+}
