@@ -7,9 +7,10 @@ paper.setup('circle');
 paper.view.autoUpdate = true
 
 const radius = 200
-const blue = new paper.Color(0, 0, 1)
+const gray = new paper.Color(0.6, 0.6, 0.6)
+const blue = new paper.Color(100 / 255, 152 / 255, 237 / 255)
 const green = new paper.Color(0, 1, 0)
-const yellow = new paper.Color(0, 1, 1)
+const pink = new paper.Color(227 / 255, 50 / 255, 224 / 255)
 
 const circle = new paper.Path.Circle({
   center: paper.view.center,
@@ -19,16 +20,24 @@ const circle = new paper.Path.Circle({
 });
 
 const pointer = new paper.Path.Line(paper.view.center, new paper.Point(paper.view.center.x + radius, paper.view.center.y))
-pointer.strokeColor = blue;
+pointer.strokeColor = gray;
 pointer.strokeWidth = 2;
 
 const cos = new paper.Path.Line(paper.view.center, pointer.segments[1].point)
 cos.strokeColor = green;
 cos.strokeWidth = 2;
 
+// const cosText = new paper.PointText(new paper.Point(pointer.segments[1].point.x - paper.view.center.x, paper.view.center.y))
+// cosText.content = '1'
+// cosText.fillColor = green
+
 const sin = new paper.Path.Line(cos.segments[1].point, cos.segments[1].point)
-sin.strokeColor = yellow;
+sin.strokeColor = pink;
 sin.strokeWidth = 2;
+
+const sinText = new paper.PointText(sin.segments[1].point)
+sinText.content = '0'
+sinText.fillColor = pink
 
 paper.view.onResize = function () {
   circle.position = paper.view.center
@@ -51,4 +60,6 @@ canvas.onmousemove = function (e: MouseEvent) {
 
   sin.segments[0].point.set(cos.segments[1].point)
   sin.segments[1].point.set(pointer.segments[1].point)
+  sinText.point.set(sin.segments[1].point.x, paper.view.center.y - (y / 2))
+  sinText.content = Math.sin(getRadian(cursorPoint.angle)).toFixed(5).toString()
 }
