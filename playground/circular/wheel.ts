@@ -18,6 +18,20 @@ const getRadFromAngle = (angle: number) => new paper.Point(
 const wheel = new paper.Group()
 wheel.applyMatrix = false
 
+const circle = new paper.Path.Circle(paper.view.center, radius)
+circle.strokeColor = new paper.Color(1, 1, 1)
+circle.strokeWidth = 1
+
+const triangle = new paper.Path([
+  new paper.Point(getRadFromAngle(0).add([-30, 0])),
+  new paper.Point(getRadFromAngle(0).add(new paper.Point(20, -20))),
+  new paper.Point(getRadFromAngle(0).add(new paper.Point(20, 20)))
+])
+triangle.fillColor = new paper.Color(1, 1, 1);
+triangle.shadowColor = new paper.Color(0, 0, 0, 0.4);
+triangle.shadowOffset = new paper.Point(-1, 0)
+triangle.shadowBlur = 8
+
 type Food = {
   color: string
   probability: number | string
