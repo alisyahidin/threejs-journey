@@ -1,4 +1,7 @@
 import * as paper from 'paper';
+import ProbabilityPick, { ProbabilityConfig } from "probability-pick";
+
+const canvas = document.getElementById('wheel') as HTMLCanvasElement
 
 paper.setup('wheel');
 paper.view.autoUpdate = true
@@ -17,27 +20,27 @@ wheel.applyMatrix = false
 
 type Food = {
   color: string
-  probability: number
+  probability: number | string
   angle?: number
 }
 
-const foods: Food[] = [
-  { color: 'red', probability: 0 },
-  { color: 'blue', probability: 0 },
-  { color: 'green', probability: 0 },
-  { color: 'yellow', probability: 0 },
-  { color: 'orange', probability: 0 },
-  { color: 'purple', probability: 0 },
-  { color: 'black', probability: 0 },
-  { color: 'white', probability: 0 },
-  { color: 'pink', probability: 1 },
+const colors: Food[] = [
+  { color: 'red', probability: 'auto' },
+  { color: 'blue', probability: 'auto' },
+  { color: 'green', probability: 'auto' },
+  { color: 'yellow', probability: 'auto' },
+  { color: 'orange', probability: 'auto' },
+  { color: 'purple', probability: 'auto' },
+  { color: 'black', probability: 'auto' },
+  { color: 'grey', probability: 'auto' },
+  { color: 'pink', probability: 'auto' },
+  { color: 'lightblue', probability: 'auto' },
 ]
 
+colors.forEach((food, i) => {
+  const rotation = 360 / colors.length;
 
-foods.forEach((food, i) => {
-  const rotation = 360 / foods.length;
-
-  foods[i].angle = (rotation * i) + (rotation / 2);
+  colors[i].angle = (rotation * i) + (rotation / 2);
 
   const pie = new paper.Path.Arc({
     from: getRadFromAngle(rotation * i),
@@ -56,16 +59,43 @@ paper.view.onResize = () => {
 
 // control animation
 
+let isAnimating = false
+
+const dataList: ProbabilityConfig = colors.reduce((prev, current, i) => {
+  prev[i] = current.probability
+  return prev
+}, {})
+
+const onHover = () => {
+  if (!isAnimating) {
+    canvas.classList.add('cursor-pointer')
+  }
+}
+
+wheel.onMouseEnter = onHover
+wheel.onMouseMove = onHover
+wheel.onMouseLeave = () => {
+  canvas.classList.remove('cursor-pointer')
+}
 
 wheel.onClick = () => {
+  if (isAnimating) return
+
+  isAnimating = true
+  canvas.classList.remove('cursor-pointer')
+  canvas.classList.add('cursor-not-allowed')
+  const picker = new ProbabilityPick({ ...dataList })
+  const selectedColor = colors[picker.get().value as number]
+
   const step = 5 * 360;
-  const selected = foods[1].angle as number
-  const targetRotation = wheel.rotation + step + selected
+  const targetRotation = wheel.rotation + step + (selectedColor.angle as number)
   const tween = wheel.tween({ rotation: wheel.rotation, }, { rotation: targetRotation }, { duration: 5000, easing: 'easeInOutCubic' })
   tween.onUpdate = (e) => {
     if (e.progress === 1) {
-      alert('Yeaayyy')
+      alert(selectedColor.color)
       wheel.rotation = 0
+      canvas.classList.remove('cursor-not-allowed')
+      isAnimating = false
     }
   }
 }

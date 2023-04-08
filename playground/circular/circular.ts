@@ -3,7 +3,7 @@ import * as THREE from 'three'
 export const getRadian = (angle: number) => angle * Math.PI / 180
 
 const wrapper = document.getElementById('circular');
-wrapper?.classList.add('[&>*:nth-child(odd)]:bg-purple-400', '[&>*:nth-child(even)]:bg-blue-300')
+wrapper?.classList.add('[&>*:nth-child(odd)]:bg-yellow-300', '[&>*:nth-child(even)]:bg-blue-300')
 
 const clock = new THREE.Clock()
 
