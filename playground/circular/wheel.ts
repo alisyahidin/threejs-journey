@@ -1,7 +1,5 @@
 import * as paper from 'paper';
 
-const canvas = document.getElementById('wheel')!;
-
 paper.setup('wheel');
 paper.view.autoUpdate = true
 
@@ -9,33 +7,42 @@ const radius = 400
 
 const rad = (angle: number) => (angle * Math.PI / 180)
 
-const getAngle = (angle: number) => new paper.Point(
+const getRadFromAngle = (angle: number) => new paper.Point(
   paper.view.center.x + (Math.cos(rad(angle)) * radius),
   paper.view.center.y - (Math.sin(rad(angle)) * radius)
 )
 
 const wheel = new paper.Group()
+wheel.applyMatrix = false
 
-const foods = [
-  { title: 'Banana', color: 'red', probability: 0.3 },
-  { title: 'Mango', color: 'blue', probability: 0.4 },
-  { title: 'Pineapple', color: 'green', probability: 0.3 },
-  { title: 'Pineapple', color: 'yellow', probability: 0.3 },
-  { title: 'Pineapple', color: 'orange', probability: 0.3 },
-  { title: 'Pineapple', color: 'purple', probability: 0.3 },
-  // { title: 'Pineapple', color: 'black', probability: 0.3 },
-  // { title: 'Pineapple', color: 'white', probability: 0.3 },
-  // { title: 'Pineapple', color: 'pink', probability: 0.3 },
+type Food = {
+  color: string
+  probability: number
+  angle?: number
+}
+
+const foods: Food[] = [
+  { color: 'red', probability: 0 },
+  { color: 'blue', probability: 0 },
+  { color: 'green', probability: 0 },
+  { color: 'yellow', probability: 0 },
+  { color: 'orange', probability: 0 },
+  { color: 'purple', probability: 0 },
+  { color: 'black', probability: 0 },
+  { color: 'white', probability: 0 },
+  { color: 'pink', probability: 1 },
 ]
 
 
 foods.forEach((food, i) => {
   const rotation = 360 / foods.length;
 
+  foods[i].angle = (rotation * i) + (rotation / 2);
+
   const pie = new paper.Path.Arc({
-    from: getAngle(rotation * i),
-    through: getAngle((rotation * i) + (rotation / 2)),
-    to: getAngle(rotation * (i + 1)),
+    from: getRadFromAngle(rotation * i),
+    through: getRadFromAngle((rotation * i) + (rotation / 2)),
+    to: getRadFromAngle(rotation * (i + 1)),
     fillColor: food.color,
   })
 
@@ -49,45 +56,16 @@ paper.view.onResize = () => {
 
 // control animation
 
-let duration = 8;
-let isClicked = false
-let isAnimating = false
-let starttime = 0;
 
-canvas.onclick = () => {
-  if (isAnimating) return
-
-  isClicked = !isClicked
-
-  if (isClicked) {
-    paper.view.onFrame = animate
-  } else {
-    paper.view.onFrame = null
-    starttime = 0
-  }
-}
-
-function animate(event) {
-  if (isClicked && starttime === 0) {
-    starttime = event.time;
-    isAnimating = true
-    canvas.classList.add('cursor-not-allowed')
-  }
-
-  const runtime = event.time - starttime;
-  const relativeProgress = runtime / duration
-
-  const rotation = 30 * (relativeProgress <= 0.5 ? relativeProgress : 1 - relativeProgress)
-
-  if (isClicked) {
-    wheel.rotate(rotation)
-  }
-
-  if (relativeProgress > 1) {
-    canvas.classList.remove('cursor-not-allowed')
-    isClicked = false
-    starttime = 0
-    isAnimating = false
-    paper.view.onFrame = null
+wheel.onClick = () => {
+  const step = 5 * 360;
+  const selected = foods[1].angle as number
+  const targetRotation = wheel.rotation + step + selected
+  const tween = wheel.tween({ rotation: wheel.rotation, }, { rotation: targetRotation }, { duration: 5000, easing: 'easeInOutCubic' })
+  tween.onUpdate = (e) => {
+    if (e.progress === 1) {
+      alert('Yeaayyy')
+      wheel.rotation = 0
+    }
   }
 }
