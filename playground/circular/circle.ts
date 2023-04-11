@@ -27,9 +27,10 @@ const cos = new paper.Path.Line(paper.view.center, pointer.segments[1].point)
 cos.strokeColor = green;
 cos.strokeWidth = 2;
 
-// const cosText = new paper.PointText(new paper.Point(pointer.segments[1].point.x - paper.view.center.x, paper.view.center.y))
-// cosText.content = '1'
-// cosText.fillColor = green
+const cosText = new paper.PointText(new paper.Point(paper.view.center.x + radius / 2, paper.view.center.y - 5))
+cosText.content = '1'
+cosText.fontSize = 16
+cosText.fillColor = green
 
 const sin = new paper.Path.Line(cos.segments[1].point, cos.segments[1].point)
 sin.strokeColor = pink;
@@ -37,6 +38,7 @@ sin.strokeWidth = 2;
 
 const sinText = new paper.PointText(sin.segments[1].point)
 sinText.content = '0'
+sinText.fontSize = 16
 sinText.fillColor = pink
 
 paper.view.onResize = function () {
@@ -50,16 +52,18 @@ canvas.onmousemove = function (e: MouseEvent) {
     -(paper.view.center.x - e.pageX),
     -((e.pageY - canvas.offsetTop) - paper.view.center.y),
   )
-  console.log(pointer.segments[1].point, cursorPoint.angle)
+
   const x = Math.cos((cursorPoint.angle * Math.PI / 180)) * radius
   const y = Math.sin((cursorPoint.angle * Math.PI / 180)) * radius
 
   pointer.segments[1].point.set(paper.view.center.x + x, paper.view.center.y - y)
 
   cos.segments[1].point.set(pointer.segments[1].point.x, paper.view.center.y)
+  cosText.point.set(sin.segments[1].point.x - Math.cos((cursorPoint.angle * Math.PI / 180)) * (radius / 2), paper.view.center.y - 5)
+  cosText.content = Math.cos(getRadian(cursorPoint.angle)).toFixed(4).toString()
 
   sin.segments[0].point.set(cos.segments[1].point)
   sin.segments[1].point.set(pointer.segments[1].point)
   sinText.point.set(sin.segments[1].point.x, paper.view.center.y - (y / 2))
-  sinText.content = Math.sin(getRadian(cursorPoint.angle)).toFixed(5).toString()
+  sinText.content = Math.sin(getRadian(cursorPoint.angle)).toFixed(4).toString()
 }
