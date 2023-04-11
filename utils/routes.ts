@@ -1,4 +1,4 @@
-const routes = [
+export const lessonRoutes = [
   {
     "title": "Home",
     "path": "/"
@@ -53,4 +53,9 @@ const routes = [
   }
 ] as const
 
-export default routes
+export const playgroundRoutes = [
+  {
+    "title": "Circular",
+    "path": "/playground/circular/index.html"
+  }
+] as const

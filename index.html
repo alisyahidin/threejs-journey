@@ -10,8 +10,14 @@
 </head>
 
 <body>
-  <div id="wrapper" class="w-[100vw] h-[100vh] flex flex-col items-center justify-center gap-4">
-    <h1 class="text-4xl text-pink-500">Holla! 👋🏻</h1>
+  <div class="w-[100vw] h-[100vh] flex flex-col items-center justify-center gap-4 pb-20">
+    <canvas id="home" class="h-60 w-60 mb-12"></canvas>
+    <div class="min-h-[300px]">
+      <div class="grid grid-cols-2 gap-32 min-w-[300px]">
+        <div id="threejs-journey" class="h-[40vh] overflow-y-auto"></div>
+        <div id="playground"></div>
+      </div>
+    </div>
   </div>
   <script type="module" src="./index.ts"></script>
   <script type="module" src="./utils/navigation.ts"></script>

@@ -21,12 +21,22 @@ const lessons = fs.readdirSync(path.join(process.cwd(), 'lessons'))
     }
   })
 
-const paths = JSON.stringify([home, ...lessons], null, 2)
+const lessonPaths = JSON.stringify([home, ...lessons], null, 2)
+
+const playground = fs.readdirSync(path.join(process.cwd(), 'playground'))
+  .map(item => {
+    return {
+      title: formatTitle(item),
+      path: `/playground/${item}/index.html`
+    }
+  })
+
+const playgroundPaths = JSON.stringify(playground, null, 2)
 
 const data = `
-const routes = ${paths} as const
+export const lessonRoutes = ${lessonPaths} as const
 
-export default routes
+export const playgroundRoutes = ${playgroundPaths} as const
 `.trim()
 
 fs.writeFile('utils/routes.ts', data, { encoding: 'utf-8' }, () => null)
