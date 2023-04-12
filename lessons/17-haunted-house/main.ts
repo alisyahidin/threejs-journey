@@ -10,7 +10,9 @@ class Scene extends THREE.Scene {
   orbitals: OrbitControls = null;
   width = window.innerWidth;
   height = window.innerHeight;
-  textureLoader = new THREE.TextureLoader()
+  textureLoader = new THREE.TextureLoader();
+  ghosts: THREE.PointLight[] = []
+  clock = new THREE.Clock()
 
   constructor(debug: boolean = true, addGridHelper: boolean = true) {
     super()
@@ -92,9 +94,22 @@ class Scene extends THREE.Scene {
     doorLight.position.set(0, 2.2, 2.5)
     this.add(doorLight)
 
+    // ghost lights
+    this.ghosts[0] = new THREE.PointLight(0xff00ff, 3, 3)
+    this.ghosts[0].position.y = 1
+    this.add(this.ghosts[0])
+
+    this.ghosts[1] = new THREE.PointLight(0x00ffff, 3, 3)
+    this.ghosts[1].position.y = 1
+    this.add(this.ghosts[1])
+
+    this.ghosts[2] = new THREE.PointLight(0xffff00, 3, 3)
+    this.ghosts[2].position.y = 1
+    this.add(this.ghosts[2])
+
     // Creates the geometry + materials
     const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(36 * 2, 36 * 2),
+      new THREE.PlaneGeometry(36 * 3, 36 * 2),
       new THREE.MeshStandardMaterial({
         map: grassColorTexture,
         aoMap: grassAmbientOcclusionTexture,
@@ -159,8 +174,21 @@ class Scene extends THREE.Scene {
     const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2)
     const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1' })
 
+    // Shadows
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+    moonLight.castShadow = true
+    doorLight.castShadow = true
+    this.ghosts[0].castShadow = true
+    this.ghosts[1].castShadow = true
+    this.ghosts[2].castShadow = true
+    door.castShadow = true
+    walls.castShadow = true
+    floor.receiveShadow = true
+
     for (let i = 0; i < 25; i++) {
-      const radius = 5 + Math.random() * 9
+      const radius = 4 + Math.random() * 8
       const x = Math.cos(i + 1) * radius
       const z = Math.sin(i + 1) * radius
 
@@ -173,6 +201,7 @@ class Scene extends THREE.Scene {
       // Rotation
       grave.rotation.z = (Math.random() - 0.5) * 0.2
       grave.rotation.y = (Math.random() - 0.5) * 0.4
+      grave.castShadow = true
 
       // Add to the graves container
       graves.add(grave)
@@ -185,6 +214,18 @@ class Scene extends THREE.Scene {
       cameraGroup.add(this.camera, 'zoom', 0, 1)
       cameraGroup.open();
     }
+  }
+
+  animateGhosts() {
+    const elapsedTime = this.clock.getElapsedTime()
+    const radius = 5;
+    const getRadian = (angle: number) => angle * Math.PI / 180;
+    this.ghosts.forEach((ghost, i) => {
+      const angle = 360 / this.ghosts.length * i
+      ghost.position.x = Math.cos(getRadian(angle) + (elapsedTime * 0.8)) * radius
+      ghost.position.z = Math.sin(getRadian(angle) + (elapsedTime * 0.8)) * radius
+      ghost.position.y = Math.sin(getRadian(angle) + (elapsedTime * 0.8 * (i + 1))) + 0.5
+    })
   }
 
   static addWindowResizing(camera: THREE.PerspectiveCamera, renderer: THREE.Renderer) {
@@ -203,6 +244,7 @@ function loop() {
   scene.camera.updateProjectionMatrix();
   scene.orbitals.update()
   scene.renderer.render(scene, scene.camera);
+  scene.animateGhosts()
   requestAnimationFrame(loop);
 }
 
